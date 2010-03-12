@@ -1,0 +1,12 @@
+Just a simple ircbot written in C
+
+To compile:
+    make
+
+See and edit configs in:
+    configs.xml
+
+To test:
+    ./bbot
+
+Very very alpha

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+make clean
+make
+echo
+echo "---------------------------------------------"
+echo
+./bbot

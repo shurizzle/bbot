@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+<configs>
+    <nickname>almanacco</nickname>
+    <username>imAbot</username>
+    <realname>developing bot</realname>
+    <servers>
+<!--        <server>
+            <name>HUF</name>
+            <address>irc.hackers-uf.org</address>
+            <port>6667</port>
+            <ssl>no</ssl>
+            <channels>
+                <chan>#huf</chan>
+                <chan>#develbot</chan>
+            </channels>
+        </server>-->
+        <server>
+            <nickname>Bronsa`GAY</nickname>
+            <name>biscotto</name>
+            <address>biscotto.ath.cx</address>
+            <port>6667</port>
+            <ssl>no</ssl>
+            <channels>
+                <chan>#0day</chan>
+            </channels>
+        </server>
+<!--        <server>
+            <name>blacklight</name>
+            <address>blacklight.gotdns.org</address>
+            <port>6667</port>
+            <ssl>no</ssl>
+            <channels>
+                <chan>#blacklight</chan>
+            </channels>
+        </server>-->
+    </servers>
+    <plugins>
+    </plugins>
+</configs>

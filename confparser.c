@@ -121,7 +121,7 @@ ircserver *
 load_servers (const char * file, names * nm)
 {
     ircserver * res = NULL;
-    ircserver * srv;
+    ircserver * srv = NULL;
     xmlDocPtr doc = NULL;
     xmlNodePtr node = NULL;
 
@@ -149,8 +149,13 @@ load_servers (const char * file, names * nm)
     {
         if (node->type == XML_ELEMENT_NODE && !xmlStrcmp (node->name, (xmlChar *) "server"))
         {
-            srv->next = get_info_server (node->children, nm);
-            srv = srv->next;
+            if (srv == NULL)
+                srv = get_info_server (node->children, nm);
+            else
+            {
+                srv->next = get_info_server (node->children, nm);
+                srv = srv->next;
+            }
             if (res == NULL)
                 res = srv;
         }

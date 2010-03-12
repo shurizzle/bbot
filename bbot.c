@@ -26,7 +26,7 @@ main ()
     srvs = load_servers ("configs.xml", nm);
     srv = srvs;
 
-    tid_srvs = (pthread_t *) malloc (servlen (srvs) * sizeof (pthread_t));
+    tid_srvs = (pthread_t *) calloc (servlen (srvs) , sizeof (pthread_t));
     for (i = 0; i < servlen (srvs); i++)
     {
         pthread_create (&tid_srvs[i], NULL, new_server, (void *) srv);

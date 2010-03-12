@@ -112,8 +112,10 @@ new_server (void * data)
                 queue_push (send_fifo, senb);
             }
         }
+
         free_message (parsed_msg);
         free (recb);
     }
+
     _close (srv->sock);
 }

@@ -1,7 +1,7 @@
 include config.mk
 
 SOURCES =ircio.c errors.c ircparser.c server.c debug.c\
-         string.c confparser.c plugins.c bbot.c
+         string.c confparser.c plugins.c signals.c bbot.c
 OBJECTS = $(SOURCES:.c=.o)
 EXECUTABLE = bbot
 
@@ -9,21 +9,21 @@ all: showoptions $(EXECUTABLE)
 
 showoptions:
 	@echo "${EXECUTABLE} build options:"
-	@echo "CFLAGS = ${CFLAGS}"
-	@echo "LDFLAGS = ${LDFLAGS}"
-	@echo "CC = ${CC}"
+	@echo "  CFLAGS = ${CFLAGS}"
+	@echo "  LDFLAGS = ${LDFLAGS}"
+	@echo "  CC = ${CC}"
 	@echo
 
 $(EXECUTABLE): $(OBJECTS)
-	@echo "CC -o $@"
+	@echo "  CC -o $@"
 	@$(CC) $(LDFLAGS) $? -o $@
 
 .c.o:
-	@echo "CC    $<"
-	@$(CC) -c $(CFLAGS) $<
+	@echo "  CC    $<"
+	@$(CC) -c $(CFLAGS) $< #&> /dev/null
 
 clean:
-	@echo "cleaning"
+	@echo "Cleaning"
 	@rm *.o
 	@rm $(EXECUTABLE)
 

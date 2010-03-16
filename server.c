@@ -3,8 +3,12 @@
 #include    <string.h>
 #include    <unistd.h>
 
+#define __USE_UNIX98
+#include    <signal.h>
+
 #include    "ircio.h"
 #include    "server.h"
+#include    "signals.h"
 
 int
 servlen (ircserver * srv)
@@ -37,85 +41,60 @@ ircserver_init (names * nm)
     return srv;
 }
 
-int
-start (ircserver * srv, queue * send_fifo, message * msg)
-{
-    char * buffer = init_buffer ();
-    int cstart;
-    if (!strncmp (msg->parameters[msg->parno - 1], ":*** Looking up your hostname...", 31))
-    {
-        cstart = 1;
-        sleep (1);
-    }
-    else if (!strncmp (msg->parameters[msg->parno - 1], ":*** Found your hostname (cached)", 32))
-    {
-        sprintf (buffer, "NICK %s\r\n", srv->nickname);
-        queue_push (send_fifo, buffer);
-        sprintf (buffer, "USER %s 0 * :%s\r\n", srv->username, srv->realname);
-        queue_push (send_fifo, buffer);
-        cstart = 1;
-    }
-    else
-        cstart = 0;
-
-    free (buffer);
-
-    return cstart;
-}
-
 void *
 new_server (void * data)
 {
     ircserver * srv = (ircserver *) data;
     int i;
-    int cstart = 1;
     char * senb = init_buffer (), * recb = init_buffer ();
     message * parsed_msg;
     pthread_t message_sender;
     queue * send_fifo = queue_init ();
+    SIGNAL signal = 0;
 
-    puts ("Connection");
-    send_fifo->sock = srv->sock = connection (srv->address, srv->port);
+    IRCCONNECT ();
     pthread_create (&message_sender, NULL, msgsender, (void *) send_fifo);
-    while (1)
+    while (!((SOCK) < 0))
     {
         recb = read_stream (srv->sock);
-        if (!strncmp ("PING", recb, 4))
+        parsed_msg = parse_raw (recb);
+        signal = get_signal (parsed_msg, srv);
+
+        if (signal == ERROR)
+            SOCK = -1;
+
+        if (signal == PING)
         {
-            sprintf (senb, "PO%s\r\n", recb + 2);
+            sprintf (senb, "PONG %s\r\n", parsed_msg->parameters[0]);
             queue_push (send_fifo, senb);
             continue;
         }
 
-        parsed_msg = parse_raw (recb);
+        if (signal == ERROR)
+            IRCCONNECT ();
 
-        if (cstart)
-        {
-            parsed_msg = parse_raw (recb);
-            cstart = start (srv, send_fifo, parsed_msg);
-            free_message (parsed_msg);
-            continue;
-        }
+        if (signal == MODE && i != srv->nchan)
+            CHAN_JOIN;
 
-        if (!strcmp (parsed_msg->command, "MODE") && !strcmp (parsed_msg->parameters[0], srv->nickname)
-            && parsed_msg->source->server != NULL && !strcmp (parsed_msg->source->server, srv->nickname))
+        if (signal == JOIN_OWN)
         {
-            for (i = 0; i < srv->nchan; i++)
-            {
-                sprintf (senb, "JOIN %s\r\n", srv->chans[i]);
-                queue_push (send_fifo, senb);
-                sprintf (senb, "PRIVMSG %s :Bronsa gay\r\n", srv->chans[i]);
-                queue_push (send_fifo, senb);
-                queue_push (send_fifo, senb);
-                queue_push (send_fifo, senb);
-                queue_push (send_fifo, senb);
-                queue_push (send_fifo, senb);
-            }
+            sprintf (senb, "PRIVMSG %s :Bronsa gay\r\n", parsed_msg->parameters[0] + 1);
+            queue_push (send_fifo, senb);
+            sprintf (senb, "PRIVMSG %s :DIO PORCO\r\n", parsed_msg->parameters[0] + 1);
+            queue_push (send_fifo, senb);
+            sprintf (senb, "PRIVMSG %s :I <3 yawn\r\n", parsed_msg->parameters[0] + 1);
+            queue_push (send_fifo, senb);
+            sprintf (senb, "PRIVMSG %s :Malex vs IRC, chi vincerà?\r\n", parsed_msg->parameters[0] + 1);
+            queue_push (send_fifo, senb);
         }
 
         free_message (parsed_msg);
-        free (recb);
     }
-
+    
+    free (recb);
+    free (senb);
+    pthread_kill (message_sender, SIGKILL);
     _close (srv->sock);
+
+    return NULL;
 }

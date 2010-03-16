@@ -11,6 +11,7 @@
 #include    "bbot.h"
 #include    "string.h"
 #include    "confparser.h"
+#include    "plugins.h"
 
 char * owner = "shura";
 
@@ -25,6 +26,8 @@ main ()
     nm = load_names ("configs.xml");
     srvs = load_servers ("configs.xml", nm);
     srv = srvs;
+
+    load_module ("/home/shura/bbot/modules/test.so");
 
     tid_srvs = (pthread_t *) calloc (servlen (srvs) , sizeof (pthread_t));
     for (i = 0; i < servlen (srvs); i++)

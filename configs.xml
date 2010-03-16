@@ -16,13 +16,12 @@
             </channels>
         </server>-->
         <server>
-            <nickname>Bronsa`GAY</nickname>
             <name>biscotto</name>
             <address>biscotto.ath.cx</address>
             <port>6667</port>
             <ssl>no</ssl>
             <channels>
-                <chan>#0day</chan>
+                <chan>#develbot</chan>
             </channels>
         </server>
 <!--        <server>

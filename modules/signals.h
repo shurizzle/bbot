@@ -1,0 +1,169 @@
+#ifndef _SIGNALS_H
+#define _SIGNALS_H
+
+#include    "ircparser.h"
+#include    "server.h"
+
+enum
+{
+/* IRC REPLIES */
+    
+    /* SERVER INFOS */
+    RPL_WELCOME = 1,
+    RPL_HOSTEDBY,
+    RPL_SERVERCREATEDON,
+    RPL_SERVINFO,
+    RPL_SERVSUPPORTED,
+
+    /* USERS INFOS */
+    RPL_TRACELINK = 200,
+    RPL_TRACECONNECTING,
+    RPL_TRACEHANDSHAKE,
+    RPL_TRACEUNKNOWN,
+    RPL_TRACEOPERATOR,
+    RPL_TRACEUSER,
+    RPL_TRACESERVER,
+
+    /* WHO(WAS|IS) INFOS */
+    RPL_NONE = 300,
+    RPL_AWAY,
+    RPL_USERHOST,
+    RPL_ISON,
+    RPL_UNAWAY = 305,
+    RPL_NOAWAY,
+    RPL_WHOISUSER = 311,
+    RPL_WHOISSERVER,
+    RPL_OPERATOR,
+    RPL_WHOWASUSER = 314,
+    RPL_ENDOFWHO,
+    RPL_WHOISIDLE = 317,
+    RPL_ENDOFWHOIS,
+    RPL_WHOISCHANNELS,
+
+    /* CHANNELS INFOS */
+    RPL_LISTSTART = 321,
+    RPL_LIST,
+    RPL_LISTEND,
+    RPL_CHANNELMODEIS,
+    RPL_CHANCREATEDON = 329,
+    RPL_NOTOPIC = 331,
+    RPL_TOPIC,
+    RPL_TOPICSETON,
+
+    /* INTERCHANNELS OPERATIONS */
+    RPL_INVITING = 341,
+    RPL_SUMMONING,
+
+    /* SERVER INFO */
+    RPL_VERSION = 351,
+    RPL_WHOREPLY,
+    RPL_NAMREPLY,
+
+    /* VARIOUS ENDS */
+    RPL_LINKS = 364,
+    RPL_ENDOFLINKS,
+    RPL_ENDOFNAMES,
+    RPL_BANLIST,
+    RPL_ENDOFBANLIST,
+    RPL_ENDOFWHOWAS,
+
+    /* VARIOUS FROM SERVER */
+    RPL_INFO = 371,
+    RPL_MOTDSTART,
+    RPL_ENDOFINFO = 374,
+    RPL_ENDOFMOTD,
+    RPL_YOUREOPER = 381,
+    RPL_REHASHING,
+
+    /* CHANNELS INFOS */
+    RPL_TIME = 391,
+    RPL_USERSSTART,
+    RPL_USERS,
+    RPL_ENDOFUSERS,
+    RPL_NOUSERS,
+
+    RPL_USINGSSL = 671,
+
+/* IRC ERRORS */
+
+    ERR_NOSUCHNICK = 401,
+    ERR_NOSUCHSERVER,
+    ERR_NOSUCHCHANNEL,
+    ERR_CANNOTSEND,
+    ERR_TOMANYCHANNELS,
+    ERR_WASNOSUCHNICK,
+    ERR_TOMANYTARGETS,
+    ERR_NOORIGIN = 409,
+    ERR_NORECIPIENT = 411,
+    ERR_NOTEXTTOSEND,
+    ERR_NOTOPLEVEL,
+    ERR_WILDTOPLEVEL,
+    ERR_UNKNOWNCOMMAND = 421,
+    ERR_NOMOTD,
+    ERR_NOADMININFO,
+    ERR_FILEERROR,
+    ERR_NONICKNAMEGIVEN = 431,
+    ERR_ERRONEUSNICKNAME,
+    ERR_NICKNAMEINUSE,
+    ERR_NICKCOLLISION = 436,
+    ERR_USERNOTINCHANNEL = 441,
+    ERR_NOTONCHANNEL,
+    ERR_USERONCHANNEL,
+    ERR_NOLOGIN,
+    ERR_SUMMONDISABLED,
+    ERR_USERDISABLED,
+    ERR_NOTREGISTERED = 451,
+    ERR_NEEDMOREPARAMS = 461,
+    ERR_ALREADYREGISTERED,
+    ERR_NOPERMFORHOST,
+    ERR_PASSWDMISMATCH,
+    ERR_YOUREBANNEDCREEP,
+    ERR_KEYSET = 467,
+    ERR_CHANNELISFULL = 471,
+    ERR_UNKNOWNMODE,
+    ERR_INVITEONLYCHAN,
+    ERR_BANNEDFROMCHAN,
+    ERR_BADCHANNELKEY,
+    ERR_BADCHANMASK,
+    ERR_NOPRIVILEGES = 481,
+    ERR_CHANOPRIVSNEEDED,
+    ERR_CANTKILLSERVER,
+    ERR_SSLREQUIRED = 489,
+    ERR_NOOPERHOST = 491,
+    ERR_UMODEUNKNOWNFLAG = 501,
+    ERR_USERSDONTMATCH,
+    ERR_ALLMUSTUSESSL = 974,
+
+    PING = 69,
+    JOIN,
+    KILL,
+    MODE,
+    KICK,
+    ERROR,
+    NOTICE,
+    QUIT,
+
+    /* OWN */
+    JOIN_OWN,
+    KILL_OWN,
+    KICK_OWN,
+
+    CTCP,
+    MESSAGE,
+    QUERY
+};
+
+#define IS_NUM(a)           ((a) >= '0' && (a) <= '9' ? 1 : 0)
+#define IS(a)               (!strcmp (msg->command, a))
+#define AMI(a)              (!strcmp (srv->nickname, a))
+#define SET_SIGNAL(a)       else if (IS (#a))\
+                                return a
+#define SET_OWN_SIGNAL(a,b) else if (!strncmp (msg->command, #a, strlen (#a) - 4) &&\
+                                AMI (b))\
+                                return a
+#define SET_OTH_SIGNAL(a,b) else if (b)\
+                                return a
+
+extern int get_signal (message *, ircserver *);
+
+#endif

@@ -9,6 +9,7 @@
 #include    "ircio.h"
 #include    "server.h"
 #include    "signals.h"
+#include    "plugins.h"
 
 int
 servlen (ircserver * srv)
@@ -45,12 +46,13 @@ void *
 new_server (void * data)
 {
     ircserver * srv = (ircserver *) data;
-    int i;
     char * senb = init_buffer (), * recb = init_buffer ();
+    int i = 0;
     message * parsed_msg;
     pthread_t message_sender;
     queue * send_fifo = queue_init ();
     SIGNAL signal = 0;
+    PLUGIN * plugin;
 
     IRCCONNECT ();
     pthread_create (&message_sender, NULL, msgsender, (void *) send_fifo);
@@ -59,16 +61,15 @@ new_server (void * data)
         recb = read_stream (srv->sock);
         parsed_msg = parse_raw (recb);
         signal = get_signal (parsed_msg, srv);
+        
+        for (plugin = plugins; plugin != NULL; plugin = plugin->next)
+        {
+            if (plugin->signal == signal)
+                plugin->exec (srv, send_fifo, parsed_msg);
+        }
 
         if (signal == ERROR)
             SOCK = -1;
-
-        if (signal == PING)
-        {
-            sprintf (senb, "PONG %s\r\n", parsed_msg->parameters[0]);
-            queue_push (send_fifo, senb);
-            continue;
-        }
 
         if (signal == ERROR)
             IRCCONNECT ();
@@ -78,13 +79,15 @@ new_server (void * data)
 
         if (signal == JOIN_OWN)
         {
-            sprintf (senb, "PRIVMSG %s :Bronsa gay\r\n", parsed_msg->parameters[0] + 1);
+/*            sprintf (senb, "PRIVMSG %s :Bronsa gay\r\n", parsed_msg->parameters[0] + 1);
             queue_push (send_fifo, senb);
             sprintf (senb, "PRIVMSG %s :DIO PORCO\r\n", parsed_msg->parameters[0] + 1);
             queue_push (send_fifo, senb);
             sprintf (senb, "PRIVMSG %s :I <3 yawn\r\n", parsed_msg->parameters[0] + 1);
             queue_push (send_fifo, senb);
             sprintf (senb, "PRIVMSG %s :Malex vs IRC, chi vincerà?\r\n", parsed_msg->parameters[0] + 1);
+            queue_push (send_fifo, senb);*/
+            sprintf (senb, "PRIVMSG %s :Ciao :3\r\n", parsed_msg->parameters[0] + 1);
             queue_push (send_fifo, senb);
         }
 

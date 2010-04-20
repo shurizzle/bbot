@@ -1,44 +1,14 @@
-#include    <pthread.h>
-
-typedef struct ircserver    ircserver;
-typedef struct tosend       tosend;
-typedef struct queue        queue;
-typedef struct function     function;
-
-struct ircserver
-{
-    char        *   nickname;
-    char        *   username;
-    char        *   realname;
-    char        *   address;
-    int             port;
-    char            ssl;
-    char        **  chans;
-    int             nchan;
-    int             sock;
-    ircserver   *   next;
-};
-
-struct tosend
-{
-    char    *   text;
-    tosend  *   next;
-};
-
-struct queue
-{
-    tosend      *   msg;
-    tosend      *   last;
-    pthread_mutex_t mutex;
-    int             sock;
-};
-
-#define BOTFUNC(name)   int name (ircserver * srv, queue * fifo)
-
-struct function
-{
-    int signal;
-    char * command;
-    int (*func) (ircserver *, queue *);
-    char * doc;
-};
+#ifndef _BBOT_H
+#define _BBOT_H
+#define BOTFUNC(name)   int name (ircserver * srv, queue * fifo, message * msg)
+#include    "../ircio.h"
+#include    "../errors.h"
+#include    "../ircparser.h"
+#include    "../debug.h"
+#include    "../server.h"
+#include    "../bbot.h"
+#include    "../string.h"
+#include    "../confparser.h"
+#include    "../plugins.h"
+#include    "../signals.h"
+#endif

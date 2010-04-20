@@ -48,6 +48,8 @@ struct names
     char * realname;
 };
 
+#include    "plugins.h"
+
 extern int servlen (ircserver *);
 extern ircserver * ircserver_init (names *);
 extern void * new_server (void *);

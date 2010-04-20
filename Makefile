@@ -24,8 +24,7 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	@echo "Cleaning"
-	@rm *.o
-	@rm $(EXECUTABLE)
+	@rm *.o $(EXECUTABLE) *.so.0.0
 
 dist: clean
 	@echo "Creating dist tarball"
@@ -46,4 +45,26 @@ uninstall:
 	@echo "Removing executable from ${DESTDIR}${PREFIX}/bin"
 	@rm -f ${DESTDIR}${PREFIX}/bin/${EXECUTABLE}
 
-.PHONY: clean all showoptions install uninstall dist
+libfiles: $(SOURCES)
+	@for i in $(SOURCES); do \
+	    echo "  CC    $$i"; \
+	    $(CC) -c $(CFLAGS) $(DINLIB) $$i &> /dev/null; \
+	done
+
+makelib: $(OBJECTS)
+	@echo "  CC -o lib${EXECUTABLE}.so.0.0"
+	$(CC) -shared -Wl,-soname,lib${EXECUTABLE}.so.0 $? -o lib${EXECUTABLE}.so.0.0 -lc
+
+lib: showoptions libfiles makelib
+
+libinstall: lib${EXECUTABLE}.so.0.0
+	@echo "Installing Library"
+	@mv libbbot.so.0.0 ${DESTDIR}${PREFIX}/lib
+	@ldconfig -n ${DESTDIR}${PREFIX}/lib
+	@ln -sf ${DESTDIR}${PREFIX}/lib/lib${EXECUTABLE}.so.0 ${DESTDIR}${PREFIX}/lib/lib${EXECUTABLE}.so
+
+libuninstall:
+	@echo "Uninstalling library"
+	@rm ${DESTDIR}${PREFIX}/lib/lib${EXECUTABLE}.so*
+
+.PHONY: clean all showoptions install uninstall dist lib libinstall libuninstall

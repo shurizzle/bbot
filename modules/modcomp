@@ -19,6 +19,6 @@ invalid $FILE
 OBJECT=$(echo $FILE | sed 's/\.c$/.o/')
 MODULE=$(echo $FILE | sed 's/\.c$/.so/')
 
-gcc -c -o $OBJECT $FILE
+gcc -I/usr/include -I/usr/include/libxml2 -c -o $OBJECT $FILE
 gcc -shared -Wl,-soname,$MODULE -o $MODULE $OBJECT
 rm $OBJECT

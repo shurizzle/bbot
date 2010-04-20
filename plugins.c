@@ -3,13 +3,28 @@
 #include    <dlfcn.h>
 
 #include    "plugins.h"
+#include    "string.h"
+
+MODULE * modules = NULL;
+PLUGIN * plugins = NULL;
 
 MODULE *
 module_init (void)
 {
     MODULE * newmodule = (MODULE *) calloc (1, sizeof (MODULE));
-    newmodule->name = newmodule->handle = newmodule->next =NULL;
+    newmodule->name = newmodule->handle = newmodule->next = NULL;
     return newmodule;
+}
+
+PLUGIN *
+plugin_init (void)
+{
+    PLUGIN * newplugin = (PLUGIN *) calloc (1, sizeof (PLUGIN));
+    newplugin->name = newplugin->module = newplugin->doc = NULL;
+    newplugin->signal = 0;
+    newplugin->exec = NULL;
+    newplugin->next = NULL;
+    return newplugin;
 }
 
 void
@@ -27,10 +42,33 @@ module_append (MODULE * to_append)
 }
 
 void
+plugin_append (PLUGIN * to_append)
+{
+    PLUGIN * tmp = plugins;
+    if (plugins == NULL)
+    {
+        plugins = to_append;
+        return;
+    }
+    while (tmp->next != NULL)
+        tmp = tmp->next;
+    tmp->next = to_append;
+}
+
+void
 module_free (MODULE * to_free)
 {
     free (to_free->name);
     free (to_free->handle);
+    free (to_free);
+}
+
+void
+plugin_free (PLUGIN * to_free)
+{
+    free (to_free->name);
+    free (to_free->module);
+    free (to_free->doc);
     free (to_free);
 }
 
@@ -43,6 +81,7 @@ module_delete (MODULE * to_del)
     {
         modules = modules->next;
         module_free (tmp);
+        return;
     }
 
     while (tmp->next != to_del)
@@ -50,6 +89,25 @@ module_delete (MODULE * to_del)
 
     tmp->next = to_del->next;
     module_free (to_del);
+}
+
+void
+plugin_delete (PLUGIN * to_del)
+{
+    PLUGIN * tmp = plugins;
+
+    if (tmp == to_del)
+    {
+        plugins = plugins->next;
+        plugin_free (tmp);
+        return;
+    }
+
+    while (tmp->next != to_del)
+        tmp = tmp->next;
+
+    tmp->next = to_del->next;
+    plugin_free (to_del);
 }
 
 void
@@ -82,11 +140,35 @@ load_module (char * file)
         return;
     }
     
-    load_plugins ((function *) dlsym (module->handle, "functions"));
+    load_plugins (module->name, functions);
     module_append (module);
 }
 
 void
-load_plugins (function fcns[])
+load_plugins (char * modname, function * fcns)
 {
+    int i;
+    PLUGIN * new;
+    for (i = 0; fcns[i].name != NULL; i++)
+    {
+        new = plugin_init ();
+        new->signal = fcns[i].signal;
+        new->name = strdup (fcns[i].name);
+        new->module = modname;
+        new->exec = fcns[i].func;
+        new->doc = strdup (fcns[i].doc);
+        plugin_append (new);
+    }
+}
+
+void
+load_lib (char * lib)
+{
+    void * handle = dlopen (lib, RTLD_GLOBAL|RTLD_NOW);
+    if (!handle)
+    {
+        fprintf (stderr, "Couldn't load %s: %s\n", lib, dlerror ());
+        return;
+    }
+    fprintf (stderr, "Loaded module %s\n", lib);
 }

@@ -15,4 +15,6 @@ OPTIMIZE = -O2 -march=native -pipe
 CFLAGS = ${OPTIMIZE} -std=c99 -Wall -Wextra -ansi -pedantic -pedantic-errors ${INCS}
 LDFLAGS = -s ${LIBS}
 
+DINLIB = -fPIC
+
 CC = gcc

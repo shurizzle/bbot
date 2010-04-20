@@ -1,6 +1,8 @@
 #ifndef _PLUGINS_H
 #define _PLUGINS_H
 
+#include    <string.h>
+
 #include    "server.h"
 #include    "ircio.h"
 #include    "ircparser.h"
@@ -42,6 +44,10 @@ extern  MODULE  *   module_init (void);
 extern  void        module_append (MODULE *);
 extern  void        module_free (MODULE *);
 extern  void        module_delete (MODULE *);
+extern  void        module_delete_by_name (char *);
+extern  void        plugin_delete (PLUGIN *);
+extern  void        plugin_delete_by_name (char *);
+extern  void        plugin_delete_by_module (char *);
 extern  void        load_module (char *);
 extern  void        load_plugins (char *, function []);
 extern  void        load_lib (char * lib);

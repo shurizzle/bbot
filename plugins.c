@@ -73,6 +73,27 @@ plugin_free (PLUGIN * to_free)
 }
 
 void
+module_delete_by_name (char * name)
+{
+    MODULE * tmp = modules, * todel = NULL;
+
+    if (!strcmp (tmp->name, name))
+    {
+        modules = modules->next;
+        module_free (tmp);
+        return;
+    }
+
+    while (strcmp (tmp->next->name, name))
+        tmp = tmp->next;
+
+    todel = tmp->next;
+    tmp->next = todel->next;
+    plugin_delete_by_module (todel->name);
+    module_free (todel);
+}
+
+void
 module_delete (MODULE * to_del)
 {
     MODULE * tmp = modules;
@@ -88,7 +109,48 @@ module_delete (MODULE * to_del)
         tmp = tmp->next;
 
     tmp->next = to_del->next;
+    plugin_delete_by_module (to_del->name);
     module_free (to_del);
+}
+
+void
+plugin_delete_by_module (char * module)
+{
+    PLUGIN * tmp = plugins, * todel = NULL;
+
+    if (!strcmp (tmp->module, module))
+    {
+        plugins = plugins->next;
+        plugin_free (tmp);
+        return;
+    }
+
+    while (strcmp (tmp->next->module, module))
+        tmp = tmp->next;
+
+    todel = tmp->next;
+    tmp->next = todel->next;
+    plugin_free (todel);
+}
+
+void
+plugin_delete_by_name (char * name)
+{
+    PLUGIN * tmp = plugins, * todel = NULL;
+
+    if (!strcmp (tmp->name, name))
+    {
+        plugins = plugins->next;
+        plugin_free (tmp);
+        return;
+    }
+
+    while (strcmp (tmp->next->name, name))
+        tmp = tmp->next;
+
+    todel = tmp->next;
+    tmp->next = todel->next;
+    plugin_free (todel);
 }
 
 void

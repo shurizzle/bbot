@@ -80,6 +80,7 @@ module_delete_by_name (char * name)
     if (!strcmp (tmp->name, name))
     {
         modules = modules->next;
+        plugin_delete_by_module (tmp->name);
         module_free (tmp);
         return;
     }
@@ -101,6 +102,7 @@ module_delete (MODULE * to_del)
     if (tmp == to_del)
     {
         modules = modules->next;
+        plugin_delete_by_module (tmp->name);
         module_free (tmp);
         return;
     }

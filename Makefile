@@ -1,11 +1,47 @@
 include config.mk
 
-SOURCES =ircio.c errors.c ircparser.c server.c debug.c\
-         string.c confparser.c plugins.c signals.c bbot.c
-OBJECTS = $(SOURCES:.c=.o)
+SOURCEDIR= sources
+BUILDDIR = build
+BINDIR = bin
+INCLUDEDIR = includes
+MODULEDIR = modules
+
+SOURCES = $(SOURCEDIR)/ircio.c $(SOURCEDIR)/errors.c $(SOURCEDIR)/ircparser.c\
+    $(SOURCEDIR)/server.c $(SOURCEDIR)/debug.c $(SOURCEDIR)/bstring.c\
+    $(SOURCEDIR)/confparser.c $(SOURCEDIR)/plugins.c $(SOURCEDIR)/signals.c\
+    $(SOURCEDIR)/bbot.c
+OBJECTS = $(BUILDDIR)/$(EXECUTABLE)/ircio.o\
+    $(BUILDDIR)/$(EXECUTABLE)/errors.o\
+    $(BUILDDIR)/$(EXECUTABLE)/ircparser.o\
+    $(BUILDDIR)/$(EXECUTABLE)/server.o\
+    $(BUILDDIR)/$(EXECUTABLE)/debug.o\
+    $(BUILDDIR)/$(EXECUTABLE)/bstring.o\
+    $(BUILDDIR)/$(EXECUTABLE)/confparser.o\
+    $(BUILDDIR)/$(EXECUTABLE)/plugins.o\
+    $(BUILDDIR)/$(EXECUTABLE)/signals.o\
+    $(BUILDDIR)/$(EXECUTABLE)/bbot.o
+LIBOBJECTS = $(BUILDDIR)/lib$(EXECUTABLE)/ircio.o\
+    $(BUILDDIR)/lib$(EXECUTABLE)/errors.o\
+    $(BUILDDIR)/lib$(EXECUTABLE)/ircparser.o\
+    $(BUILDDIR)/lib$(EXECUTABLE)/server.o\
+    $(BUILDDIR)/lib$(EXECUTABLE)/debug.o\
+    $(BUILDDIR)/lib$(EXECUTABLE)/bstring.o\
+    $(BUILDDIR)/lib$(EXECUTABLE)/confparser.o\
+    $(BUILDDIR)/lib$(EXECUTABLE)/plugins.o\
+    $(BUILDDIR)/lib$(EXECUTABLE)/signals.o\
+    $(BUILDDIR)/lib$(EXECUTABLE)/bbot.o
 EXECUTABLE = bbot
 
-all: showoptions $(EXECUTABLE)
+EXTRAFLAGS =
+
+INCS += -I${INCLUDEDIR}
+
+all: init showoptions compilebot
+
+init:
+	@mkdir -p $(BINDIR)
+	@mkdir -p $(BUILDDIR)/$(EXECUTABLE)
+	@mkdir -p $(BUILDDIR)/lib$(EXECUTABLE)
 
 showoptions:
 	@echo "${EXECUTABLE} build options:"
@@ -14,52 +50,52 @@ showoptions:
 	@echo "  CC = ${CC}"
 	@echo
 
+compilebot: $(EXECUTABLE)
+
 $(EXECUTABLE): $(OBJECTS)
 	@echo "  CC -o $@"
-	@$(CC) $(LDFLAGS) $? -o $@
+	@$(CC) $(LDFLAGS) $? -o $(BINDIR)/$@
 
-.c.o:
+$(OBJECTS): $(BUILDDIR)/$(EXECUTABLE)/%.o: $(SOURCEDIR)/%.c
 	@echo "  CC    $<"
-	@$(CC) -c $(CFLAGS) $< #&> /dev/null
+	@$(CC) -c $(LDFLAGS) $(INCS) $(EXTRAFLAGS) $< -o $@
 
 clean:
 	@echo "Cleaning"
-	@rm *.o $(EXECUTABLE) *.so.0.0
+	@rm -Rf bin build
 
 dist: clean
 	@echo "Creating dist tarball"
 	@mkdir -p ${EXECUTABLE}-${VERSION}
-	@cp -R Makefile config.mk ${SOURCES} $(SOURCES:.c=.h) configs.xml\
-     COPYNG README ${EXECUTABLE}-${VERSION}
+	@cp -R Makefile config.mk $(SOURCEDIR) $(INCLUDEDIR) $(MODULEDIR) configs.xml\
+     COPYNG README TODO ${EXECUTABLE}-${VERSION}
 	@tar -cf ${EXECUTABLE}-${VERSION}.tar ${EXECUTABLE}-${VERSION}
 	@gzip ${EXECUTABLE}-${VERSION}.tar
-	@rm -rf ${EXECUTABLE}-${VERSION}
+	@rm -Rf ${EXECUTABLE}-${VERSION}
 
 install: all
 	@echo "Installing executable to ${DESTDIR}${PREFIX}/bin"
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
-	@cp -f ${EXECUTABLE} ${DESTDIR}${PREFIX}/bin
+	@cp -f ${BINDIR}/${EXECUTABLE} ${DESTDIR}${PREFIX}/bin
 	@chmod 755 ${DESTDIR}${PREFIX}/bin/${EXECUTABLE}
 
 uninstall:
 	@echo "Removing executable from ${DESTDIR}${PREFIX}/bin"
 	@rm -f ${DESTDIR}${PREFIX}/bin/${EXECUTABLE}
 
-libfiles: $(SOURCES)
-	@for i in $(SOURCES); do \
-	    echo "  CC    $$i"; \
-	    $(CC) -c $(CFLAGS) $(DINLIB) $$i &> /dev/null; \
-	done
+$(LIBOBJECTS): $(BUILDDIR)/lib$(EXECUTABLE)/%.o: $(SOURCEDIR)/%.c
+	@echo "  CC    $<"
+	@$(CC) -c $(LDFLAGS) $(INCS) $(DINLIB) $< -o $@
 
-makelib: $(OBJECTS)
+makelib: $(LIBOBJECTS)
 	@echo "  CC -o lib${EXECUTABLE}.so.0.0"
-	$(CC) -shared -Wl,-soname,lib${EXECUTABLE}.so.0 $? -o lib${EXECUTABLE}.so.0.0 -lc
+	$(CC) -shared -Wl,-soname,lib${EXECUTABLE}.so.0 $? -o $(BINDIR)/lib${EXECUTABLE}.so.0.0 -lc
 
-lib: showoptions libfiles makelib
+lib: init showoptions makelib
 
-libinstall: lib${EXECUTABLE}.so.0.0
+libinstall: $(BINDIR)/lib${EXECUTABLE}.so.0.0
 	@echo "Installing Library"
-	@mv libbbot.so.0.0 ${DESTDIR}${PREFIX}/lib
+	@mv $(BINDIR)/libbbot.so.0.0 ${DESTDIR}${PREFIX}/lib
 	@ldconfig -n ${DESTDIR}${PREFIX}/lib
 	@ln -sf ${DESTDIR}${PREFIX}/lib/lib${EXECUTABLE}.so.0 ${DESTDIR}${PREFIX}/lib/lib${EXECUTABLE}.so
 

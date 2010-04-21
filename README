@@ -3,6 +3,15 @@ Just a simple ircbot written in C
 To compile:
     make
 
+To install:
+    make install (useless)
+
+To compile library:
+    make lib
+
+To install library:
+    make libinstall (YOU MUST DO IT)
+
 See and edit configs in:
     configs.xml
 

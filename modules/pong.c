@@ -2,10 +2,6 @@
 #include    <stdlib.h>
 #include    "bbot.h"
 
-#ifndef NULL
-#   define  NULL    (void *) 0
-#endif
-
 BOTFUNC (ping)
 {
     char * buffer = init_buffer ();

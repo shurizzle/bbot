@@ -32,8 +32,6 @@ LIBOBJECTS = $(BUILDDIR)/lib$(EXECUTABLE)/ircio.o\
     $(BUILDDIR)/lib$(EXECUTABLE)/bbot.o
 EXECUTABLE = bbot
 
-EXTRAFLAGS =
-
 INCS += -I${INCLUDEDIR}
 
 all: init showoptions compilebot

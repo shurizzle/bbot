@@ -5,6 +5,8 @@ BUILDDIR = build
 BINDIR = bin
 INCLUDEDIR = includes
 MODULEDIR = modules
+DESTDIR ?= /usr/local/bin
+LIBDIR ?= /usr/local/lib
 
 SOURCES = $(SOURCEDIR)/ircio.c $(SOURCEDIR)/errors.c $(SOURCEDIR)/ircparser.c\
     $(SOURCEDIR)/server.c $(SOURCEDIR)/debug.c $(SOURCEDIR)/bstring.c\
@@ -42,10 +44,10 @@ init:
 	@mkdir -p $(BUILDDIR)/lib$(EXECUTABLE)
 
 showoptions:
-	@echo "${EXECUTABLE} build options:"
-	@echo "  CFLAGS = ${CFLAGS}"
-	@echo "  LDFLAGS = ${LDFLAGS}"
-	@echo "  CC = ${CC}"
+	@echo "$(EXECUTABLE) build options:"
+	@echo "  CFLAGS = $(CFLAGS)"
+	@echo "  LDFLAGS = $(LDFLAGS)"
+	@echo "  CC = $(CC)"
 	@echo
 
 compilebot: $(EXECUTABLE)
@@ -56,7 +58,7 @@ $(EXECUTABLE): $(OBJECTS)
 
 $(OBJECTS): $(BUILDDIR)/$(EXECUTABLE)/%.o: $(SOURCEDIR)/%.c
 	@echo "  CC    $<"
-	@$(CC) -c $(LDFLAGS) $(INCS) $(EXTRAFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) $(INCS) $(EXTRAFLAGS) $< -o $@
 
 clean:
 	@echo "Cleaning"
@@ -64,41 +66,41 @@ clean:
 
 dist: clean
 	@echo "Creating dist tarball"
-	@mkdir -p ${EXECUTABLE}-${VERSION}
+	@mkdir -p "$(EXECUTABLE)-$(VERSION)"
 	@cp -R Makefile config.mk $(SOURCEDIR) $(INCLUDEDIR) $(MODULEDIR) configs.xml\
      COPYNG README TODO ${EXECUTABLE}-${VERSION}
-	@tar -cf ${EXECUTABLE}-${VERSION}.tar ${EXECUTABLE}-${VERSION}
-	@gzip ${EXECUTABLE}-${VERSION}.tar
-	@rm -Rf ${EXECUTABLE}-${VERSION}
+	@tar -cf $(EXECUTABLE)-$(VERSION).tar $(EXECUTABLE)-$(VERSION)
+	@gzip $(EXECUTABLE)-$(VERSION).tar
+	@rm -Rf $(EXECUTABLE)-$(VERSION)
 
 install: all
-	@echo "Installing executable to ${DESTDIR}${PREFIX}/bin"
-	@mkdir -p ${DESTDIR}${PREFIX}/bin
-	@cp -f ${BINDIR}/${EXECUTABLE} ${DESTDIR}${PREFIX}/bin
-	@chmod 755 ${DESTDIR}${PREFIX}/bin/${EXECUTABLE}
+	@echo "Installing executable to $(DESTDIR)"
+	@mkdir -p "$(DESTDIR)"
+	@cp -f "$(BINDIR)/$(EXECUTABLE)" "$(DESTDIR)"
+	@chmod 755 "$(DESTDIR)/$(EXECUTABLE)"
 
 uninstall:
-	@echo "Removing executable from ${DESTDIR}${PREFIX}/bin"
-	@rm -f ${DESTDIR}${PREFIX}/bin/${EXECUTABLE}
+	@echo "Removing executable from $(DESTDIR)"
+	@rm -f "$(DESTDIR)/$(EXECUTABLE)"
 
 $(LIBOBJECTS): $(BUILDDIR)/lib$(EXECUTABLE)/%.o: $(SOURCEDIR)/%.c
 	@echo "  CC    $<"
 	@$(CC) -c $(LDFLAGS) $(INCS) $(DINLIB) $< -o $@
 
 makelib: $(LIBOBJECTS)
-	@echo "  CC -o lib${EXECUTABLE}.so.0.0"
-	$(CC) -shared -Wl,-soname,lib${EXECUTABLE}.so.0 $? -o $(BINDIR)/lib${EXECUTABLE}.so.0.0 -lc
+	@echo "  CC -o lib$(EXECUTABLE).so.0.0"
+	$(CC) -shared -Wl,-soname,lib$(EXECUTABLE).so.0 $? -o $(BINDIR)/lib$(EXECUTABLE).so.0.0 -lc
 
 lib: init showoptions makelib
 
-libinstall: $(BINDIR)/lib${EXECUTABLE}.so.0.0
+libinstall: $(BINDIR)/lib$(EXECUTABLE).so.0.0
 	@echo "Installing Library"
-	@mv $(BINDIR)/libbbot.so.0.0 ${DESTDIR}${PREFIX}/lib
-	@ldconfig -n ${DESTDIR}${PREFIX}/lib
-	@ln -sf ${DESTDIR}${PREFIX}/lib/lib${EXECUTABLE}.so.0 ${DESTDIR}${PREFIX}/lib/lib${EXECUTABLE}.so
+	@mv "$(BINDIR)/lib$(EXECUTABLE).so.0.0" "$(LIBDIR)"
+	@ldconfig -n "$(LIBDIR)"
+	@ln -sf "$(LIBDIR)/lib$(EXECUTABLE).so.0" "$(LIBDIR)/lib$(EXECUTABLE).so"
 
 libuninstall:
 	@echo "Uninstalling library"
-	@rm ${DESTDIR}${PREFIX}/lib/lib${EXECUTABLE}.so*
+	@rm $(LIBDIR)/lib${EXECUTABLE}.so*
 
 .PHONY: clean all showoptions install uninstall dist lib libinstall libuninstall

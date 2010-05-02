@@ -1,7 +1,5 @@
 VERSION = 0.1
 
-PREFIX = /usr/local
-
 XML2LIB = -lxml2 -lz -lm
 XML2INC = /usr/include/libxml2
 

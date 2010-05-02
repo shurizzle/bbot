@@ -6,7 +6,7 @@ BINDIR = bin
 INCLUDEDIR = includes
 MODULEDIR = modules
 DESTDIR ?= /usr/local/bin
-LIBDIR ?= /usr/local/lib
+LIBDIR ?= $(DESTDIR:bin=lib)
 
 SOURCES = $(SOURCEDIR)/ircio.c $(SOURCEDIR)/errors.c $(SOURCEDIR)/ircparser.c\
     $(SOURCEDIR)/server.c $(SOURCEDIR)/debug.c $(SOURCEDIR)/bstring.c\

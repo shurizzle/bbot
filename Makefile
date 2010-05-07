@@ -92,7 +92,7 @@ $(LIBOBJECTS): $(BUILDDIR)/lib$(EXECUTABLE)/%.o: $(SOURCEDIR)/%.c
 
 makelib: $(LIBOBJECTS)
 	@echo "  CC -o lib$(EXECUTABLE).so.0.0"
-	$(CC) -shared -Wl,-soname,lib$(EXECUTABLE).so.0 $? -o $(BINDIR)/lib$(EXECUTABLE).so.0.0 -lc
+	@$(CC) -shared -Wl,-soname,lib$(EXECUTABLE).so.0 $? -o $(BINDIR)/lib$(EXECUTABLE).so.0.0 -lc $(LDFLAGS)
 
 lib: init showoptions makelib
 

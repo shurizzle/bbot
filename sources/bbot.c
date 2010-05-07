@@ -2,6 +2,7 @@
 #include    <stdlib.h>
 #include    <string.h>
 #include    <pthread.h>
+#include    <alloca.h>
 
 #include    <bbot.h>
 
@@ -22,7 +23,7 @@ main ()
     load_lib ("/usr/lib/libbbot.so");
     load_module ("modules/pong.so");
 
-    tid_srvs = (pthread_t *) calloc (servlen (srvs) , sizeof (pthread_t));
+    tid_srvs = (pthread_t *) alloca (servlen (srvs) * sizeof (pthread_t));
     for (i = 0; i < servlen (srvs); i++)
     {
         pthread_create (&tid_srvs[i], NULL, new_server, (void *) srv);

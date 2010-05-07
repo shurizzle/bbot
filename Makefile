@@ -32,6 +32,8 @@ LIBOBJECTS = $(BUILDDIR)/lib$(EXECUTABLE)/ircio.o\
     $(BUILDDIR)/lib$(EXECUTABLE)/plugins.o\
     $(BUILDDIR)/lib$(EXECUTABLE)/signals.o\
     $(BUILDDIR)/lib$(EXECUTABLE)/bbot.o
+
+SAMPLECONF = configs.xml
 EXECUTABLE = bbot
 
 INCS += -I${INCLUDEDIR}
@@ -55,6 +57,7 @@ compilebot: $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS)
 	@echo "  CC -o $@"
 	@$(CC) $(LDFLAGS) $? -o $(BINDIR)/$@
+	@cp $(SAMPLECONF) $(BINDIR)
 
 $(OBJECTS): $(BUILDDIR)/$(EXECUTABLE)/%.o: $(SOURCEDIR)/%.c
 	@echo "  CC    $<"
@@ -67,7 +70,7 @@ clean:
 dist: clean
 	@echo "Creating dist tarball"
 	@mkdir -p "$(EXECUTABLE)-$(VERSION)"
-	@cp -R Makefile config.mk $(SOURCEDIR) $(INCLUDEDIR) $(MODULEDIR) configs.xml\
+	@cp -R Makefile config.mk $(SOURCEDIR) $(INCLUDEDIR) $(MODULEDIR) $(SAMPLECONF)\
      COPYNG README TODO ${EXECUTABLE}-${VERSION}
 	@tar -cf $(EXECUTABLE)-$(VERSION).tar $(EXECUTABLE)-$(VERSION)
 	@gzip $(EXECUTABLE)-$(VERSION).tar

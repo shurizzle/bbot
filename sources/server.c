@@ -37,7 +37,7 @@ ircserver_init (names * nm)
     srv->address = (char *) 0;
     srv->chans = (char **) 0;
     srv->next = (ircserver *) 0;
-    srv->port = srv->nchan = srv->nchan = srv->ssl = 0;
+    srv->port = srv->nchan = srv->ssl = 0;
 
     return srv;
 }
